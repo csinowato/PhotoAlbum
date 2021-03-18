@@ -9,7 +9,7 @@ from boto3.dynamodb.conditions import Key
 BUCKET_NAME = "b2-photo-storage"
 
 # ElasticSearch Instance
-host = 'vpc-photos-cxixzknxphgyayje7oqyy63w7u.us-east-1.es.amazonaws.com/'
+host = 'vpc-photos-cxixzknxphgyayje7oqyy63w7u.us-east-1.es.amazonaws.com'
 region = 'us-east-1'
 
 
@@ -62,12 +62,25 @@ def lambda_handler(event, context):
 
 
     # Add to ElasticSearch
+    # Should ID be filename or just auto create - if using filename, files cant have the same name
     res = es.index(index="photos", doc_type="Photo", id=filename, body=json.dumps(json_object))
+    # Not including id parameter so elasticsearch can auto generate it (so different images can have the same filename)
+    # res = es.index(index="photos", doc_type="Photo", body=json.dumps(json_object))
     print("RESULT", res['result'])
     # https://elasticsearch-py.readthedocs.io/en/6.8.2/
+
+    # check
+    checkdata = []
+    res_check = es.search(index="photos", body={"query": {"match": {'labels': 'Food'}}})
+    for hit in res_check['hits']['hits']:
+        checkdata.append(hit['_id'])
+
+    print("RES", res_check)
+    print('checkdata', checkdata)
+
 
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
+        # 'body': json.dumps('Hello from Lambda!')
     }
