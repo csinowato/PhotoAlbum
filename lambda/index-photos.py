@@ -39,7 +39,7 @@ def lambda_handler(event, context):
     # Extract labels using Rekognition
     client=boto3.client('rekognition', 'us-east-1')
 
-    response = client.detect_labels(Image={'Bytes': base64_binary})
+    response = client.detect_labels(Image={'Bytes': base64_binary}, MinConfidence=80)
     print("REKOGNITION RESPONSE", response)
     # response = client.detect_labels(Image={'S3Object':{'Bucket':BUCKET_NAME,'Name':filename}},
             # MaxLabels=10, MinConfidence=80)
@@ -49,9 +49,14 @@ def lambda_handler(event, context):
     # https://docs.aws.amazon.com/rekognition/latest/dg/labels-detect-labels-image.html
 
 
+    # Extract custom labels and add them to json object
     s3client = boto3.client('s3')
     metadata = s3client.head_object(Bucket=BUCKET_NAME, Key=filename)
-    print('metadata', metadata)
+    customLabels = metadata['ResponseMetadata']['HTTPHeaders']['x-amz-meta-x-amz-meta-customlabels']
+    customLabelsArr = [x.strip() for x in customLabels.split(',')]
+    print('custom labels', customLabelsArr)
+    for i in customLabelsArr:
+        json_object['labels'].append(i)
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
 
 
