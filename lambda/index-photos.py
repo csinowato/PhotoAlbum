@@ -4,7 +4,7 @@ import datetime
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 from boto3.dynamodb.conditions import Key
-
+import base64
 
 BUCKET_NAME = "b2-photo-storage"
 
@@ -26,10 +26,23 @@ def lambda_handler(event, context):
          ]
     }
 
+    s3 = boto3.resource('s3', region_name=region)
+    obj = s3.Object(BUCKET_NAME, filename)
+    img = obj.get()['Body'].read().decode('utf-8')
+    img_body = img.split(',')[1] #the first part of the img file is the type i.e. image/jpeg so we only want the bytes part
+    print("IMAGE FILE", img_body)
+
+    # Rekognition requires images to be in base64 binary format, not just base64
+    base64_binary = base64.b64decode(img_body)
+    print("BINARY", base64_binary)
+
     # Extract labels using Rekognition
     client=boto3.client('rekognition', 'us-east-1')
-    response = client.detect_labels(Image={'S3Object':{'Bucket':BUCKET_NAME,'Name':filename}},
-            MaxLabels=10, MinConfidence=80)
+
+    response = client.detect_labels(Image={'Bytes': base64_binary})
+    print("REKOGNITION RESPONSE", response)
+    # response = client.detect_labels(Image={'S3Object':{'Bucket':BUCKET_NAME,'Name':filename}},
+            # MaxLabels=10, MinConfidence=80)
     for label in response['Labels']:
         json_object['labels'].append(label['Name'])
         print ("Label: " + label['Name'])
