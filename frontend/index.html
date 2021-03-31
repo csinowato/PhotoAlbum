@@ -58,12 +58,31 @@
             <h3 style="margin: 30px 0px 10px 0px">Search for photos</h3>
             <input type="text" class="form-control" id="transcript" placeholder="Search..." aria-label="Search..." aria-describedby="basic-addon2">
 
-            <p class="form-text text-muted">To search by voice, press start and speak into your mic.</p>
-            <div class="row">
-                <div class="col">
-                    <button id="start-button" class="btn btn-outline-dark btn-sm" title="Start Transcription">Start</button>
-                    <button id="stop-button" class="btn btn-outline-dark btn-sm" title="Stop Transcription" disabled="true">Stop</button>
-                    <button id="reset-button" class="btn btn-outline-dark btn-sm" title="Clear Transcript">Clear Transcript</button>
+            <!-- For Connecting to Web Socket -->
+            <div id="credentials-block" style="margin: 20px 0px 20px 0px">
+                <small id="labels-info" class="form-text text-info" style="margin: 20px 0px 5px 0px">* To search by voice, please enter valid credentials</small>
+                <div class="row">
+                    <div class="col form-inline">
+                        <label class="form-text" style="margin: 5px">Access ID:</label>
+                        <input type="password" class="form-control form-control-sm border border-info" id="access_id" placeholder="ACCESS ID" value="" />
+
+                        <label class="form-text" style="margin: 5px">Secret Key:</label>
+                        <input type="password" class="form-control form-control-sm border border-info" id="secret_key" placeholder="SECRET KEY" value="" />
+                        <button id="credentials-button" class="btn btn-info btn-sm" style="margin: 5px" title="Hide Credentials">Hide Credentials</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search by Voice -->
+            <!-- <div id="voice-controls" style="display:none;"> -->
+            <div id = "voice-controls" style="margin: 10px 0px 10px 0px">
+                <small id="labels-info" class="form-text text-muted" style="margin: 10px 0px 5px 0px">Press start and speak into your mic.</small>
+                <div class="row">
+                    <div class="col">
+                        <button id="start-button" class="btn btn-secondary btn-sm" title="Start Transcription">Start</button>
+                        <button id="stop-button" class="btn btn-secondary btn-sm" title="Stop Transcription" disabled="true">Stop</button>
+                        <button id="reset-button" class="btn btn-secondary btn-sm" title="Clear Transcript">Clear Transcript</button>
+                    </div>
                 </div>
             </div>
 
@@ -83,27 +102,27 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
 
+
     <!-- For Photo Upload and Search Functions -->
     <script src=index.js></script>
     <!-- For Voice Accessibility. Source: github.com/amazon-archives/amazon-transcribe-websocket-static -->
     <script src="dist/main.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            // Hide credentials bar
+            $('#credentials-button').on('click', function(e){
+                e.preventDefault()
 
-    <!-- For Connecting to Web Socket -->
-    <body>
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <label>Access ID:</label>
-                    <input type="password" id="access_id" placeholder="ACCESS ID" value="" />
+                let credentialsBlock = document.getElementById('credentials-block');
+                credentialsBlock.style.display = 'none';
 
-                    <label>Secret Key:</label>
-                    <input type="password" id="secret_key" placeholder="SECRET KEY" value="" />
-                </div>
+                // let voiceControls = document.getElementById('voice-controls');
+                // voiceControls.style.display = 'block';
+            })
+        });
+    </script>
 
-            </div>
-        </div>
-    </body>
 
 </body>
 </html>
