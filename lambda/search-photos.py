@@ -41,15 +41,31 @@ def lambda_handler(event, context):
 
     print("RESPONSE FROM LEX", response)
 
+    # Handle invalid user searches
+    if 'slots' not in response:
+        return {
+            "statusCode": 200,
+            'headers': {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps([])
+        }
 
-    # logger.debug('event.bot.name={}'.format(event['bot']['name']))
-    # return dispatch(event)
-
+    # Extract labels
     first_label = response['slots']['firstlabel']
     second_label = response['slots']['secondlabel']
 
     print("FIRST LABEL", first_label)
     print("SECOND LABEL", second_label)
+
+    # Get singular versions of labels
+    labels_to_check = [first_label]
+    if first_label[-1] == 's':
+        labels_to_check.append(first_label[:-1])
+    if second_label:
+        labels_to_check.append(second_label)
+        if second_label[-1] == 's':
+            labels_to_check.append(second_label[:-1])
+
+    print("LABELS TO CHECK", labels_to_check)
 
 
     # ElasticSearch auth
@@ -67,24 +83,25 @@ def lambda_handler(event, context):
     )
     # https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-request-signing.html#es-request-signing-python
 
-    # Search for first label
-    searchresults = []
-    search_res = es.search(index="photos", body={"query": {"match": {'labels': first_label}}})
-    for hit in search_res['hits']['hits']:
-        searchresults.append(hit['_source']['objectKey'])
 
-    # Search for second label if any
-    if second_label:
-        search_res2 = es.search(index="photos", body={"query": {"match": {'labels': second_label}}})
-        for hit in search_res2['hits']['hits']:
+    searchresults = []
+
+    # Search function
+    def elasticsearch_helper(labelname):
+        search_res = es.search(index="photos", body={"query": {"match": {'labels': labelname}}})
+        for hit in search_res['hits']['hits']:
             searchresults.append(hit['_source']['objectKey'])
     # https://elasticsearch-py.readthedocs.io/en/v7.11.0/
 
+    # Call search function
+    for i in labels_to_check:
+        elasticsearch_helper(i)
     print('SEARCH RESULTS', searchresults)
+
 
     # Remove duplicate files
     unique_results = list(set(searchresults))
-    print("UNIQUE -->", unique_results)
+    print("UNIQUE RESULTS", unique_results)
 
 
     return {
