@@ -87,8 +87,6 @@ def lambda_handler(event, context):
     print("UNIQUE -->", unique_results)
 
 
-
-
     return {
         "statusCode": 200,
         'headers': {"Access-Control-Allow-Origin": "*"},

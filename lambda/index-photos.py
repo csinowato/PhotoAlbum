@@ -28,21 +28,13 @@ def lambda_handler(event, context):
 
     s3 = boto3.resource('s3', region_name=region)
     obj = s3.Object(BUCKET_NAME, filename)
-    img = obj.get()['Body'].read().decode('utf-8')
-    img_body = img.split(',')[1] #the first part of the img file is the type i.e. image/jpeg so we only want the bytes part
-    print("IMAGE FILE", img_body)
-
-    # Rekognition requires images to be in base64 binary format, not just base64
-    base64_binary = base64.b64decode(img_body)
-    print("BINARY", base64_binary)
 
     # Extract labels using Rekognition
     client=boto3.client('rekognition', 'us-east-1')
-
-    response = client.detect_labels(Image={'Bytes': base64_binary}, MinConfidence=80)
+    response = client.detect_labels(Image={'S3Object':{'Bucket':BUCKET_NAME,'Name':filename}},
+            MaxLabels=10, MinConfidence=80)
     print("REKOGNITION RESPONSE", response)
-    # response = client.detect_labels(Image={'S3Object':{'Bucket':BUCKET_NAME,'Name':filename}},
-            # MaxLabels=10, MinConfidence=80)
+
     for label in response['Labels']:
         json_object['labels'].append(label['Name'])
         print ("Label: " + label['Name'])
@@ -52,7 +44,8 @@ def lambda_handler(event, context):
     # Extract custom labels and add them to json object
     s3client = boto3.client('s3')
     metadata = s3client.head_object(Bucket=BUCKET_NAME, Key=filename)
-    customLabels = metadata['ResponseMetadata']['HTTPHeaders']['x-amz-meta-x-amz-meta-customlabels']
+    print("METADATA", metadata)
+    customLabels = metadata['ResponseMetadata']['HTTPHeaders']['x-amz-meta-customlabels']
     customLabelsArr = [x.strip() for x in customLabels.split(',')]
     print('custom labels', customLabelsArr)
     for i in customLabelsArr:
@@ -86,16 +79,6 @@ def lambda_handler(event, context):
     res = es.index(index="photos", doc_type="Photo", body=json.dumps(json_object))
     print("RESULT", res['result'])
     # https://elasticsearch-py.readthedocs.io/en/6.8.2/
-
-    # check
-    checkdata = []
-    res_check = es.search(index="photos", body={"query": {"match": {'labels': 'Food'}}})
-    for hit in res_check['hits']['hits']:
-        checkdata.append(hit['_id'])
-
-    print("RES", res_check)
-    print('checkdata', checkdata)
-
 
 
     return {
