@@ -15,8 +15,12 @@ region = 'us-east-1'
 
 def lambda_handler(event, context):
     print("EVENT", event)
-    filename = event["Records"][0]['s3']['object']['key']
+    filenameInput = event["Records"][0]['s3']['object']['key']
+
+    # Format filename (remove spaces)
+    filename = ''.join([c for c in filenameInput if c != ' '])
     print("FILENAME", filename)
+
 
     json_object = {
         "objectKey": filename,
@@ -45,11 +49,12 @@ def lambda_handler(event, context):
     s3client = boto3.client('s3')
     metadata = s3client.head_object(Bucket=BUCKET_NAME, Key=filename)
     print("METADATA", metadata)
-    customLabels = metadata['ResponseMetadata']['HTTPHeaders']['x-amz-meta-customlabels']
-    customLabelsArr = [x.strip() for x in customLabels.split(',')]
-    print('custom labels', customLabelsArr)
-    for i in customLabelsArr:
-        json_object['labels'].append(i)
+    if 'x-amz-meta-customlabels' in metadata['ResponseMetadata']['HTTPHeaders']:
+        customLabels = metadata['ResponseMetadata']['HTTPHeaders']['x-amz-meta-customlabels']
+        customLabelsArr = [x.strip() for x in customLabels.split(',')]
+        print('custom labels', customLabelsArr)
+        for i in customLabelsArr:
+            json_object['labels'].append(i)
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
 
 
@@ -73,9 +78,7 @@ def lambda_handler(event, context):
 
 
     # Add to ElasticSearch
-    # Should ID be filename or just auto create - if using filename, files cant have the same name
-    # res = es.index(index="photos", doc_type="Photo", id=filename, body=json.dumps(json_object))
-    # Not including id parameter so elasticsearch can auto generate it (so different images can have the same filename)
+    # If using filename as the ID, different files cant have the same filename (so excluding id parameter so elasticsearch can auto generate it)
     res = es.index(index="photos", doc_type="Photo", body=json.dumps(json_object))
     print("RESULT", res['result'])
     # https://elasticsearch-py.readthedocs.io/en/6.8.2/

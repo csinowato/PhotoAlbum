@@ -10,7 +10,10 @@ function uploadToS3(e) {
     console.log("Uploading to S3 Bucket");
 
     let fileInfo = $('#upload-photo-form')[0].files[0];
-    let filename = fileInfo.name;
+    let filenameInput = fileInfo.name;
+    // Format filename (remove spaces)
+    let filename = filenameInput.replace(/\s/g, '');
+    console.log("Filename", filename)
     let customLabels = $('#custom-labels').val();
     console.log("CUSTOM LABELS-->", customLabels)
 
@@ -26,7 +29,7 @@ function uploadToS3(e) {
         // base64 encode the image
         let result = await getBase64(fileInfo);
         result = result.replace(/^data:image\/(png|jpg|jpeg);base64,/,"");
-        console.log("RESULT:", result);
+        // console.log("RESULT:", result);
 
         let params = {
             "bucket": "b2-photo-storage",

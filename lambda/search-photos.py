@@ -42,16 +42,20 @@ def lambda_handler(event, context):
     print("RESPONSE FROM LEX", response)
 
     # Handle invalid user searches
-    if 'slots' not in response:
+    if 'slots' not in response or 'firstlabel' not in response['slots'] or response['slots']['firstlabel'] is None:
         return {
             "statusCode": 200,
             'headers': {"Access-Control-Allow-Origin": "*"},
             "body": json.dumps([])
         }
 
+
     # Extract labels
     first_label = response['slots']['firstlabel']
     second_label = response['slots']['secondlabel']
+
+    if first_label is None:
+        return_error()
 
     print("FIRST LABEL", first_label)
     print("SECOND LABEL", second_label)
@@ -110,5 +114,3 @@ def lambda_handler(event, context):
         "body": json.dumps(unique_results)
         # "isBase64Encoded": true|false,
     }
-
-
