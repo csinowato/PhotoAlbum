@@ -54,9 +54,6 @@ def lambda_handler(event, context):
     first_label = response['slots']['firstlabel']
     second_label = response['slots']['secondlabel']
 
-    if first_label is None:
-        return_error()
-
     print("FIRST LABEL", first_label)
     print("SECOND LABEL", second_label)
 
