@@ -1,0 +1,9 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 bucket for website hosting
+Resources:
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: 'csinowato-photoalbum'
+      WebsiteConfiguration:
+        IndexDocument: index.html
