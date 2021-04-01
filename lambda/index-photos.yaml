@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: AWS Serverless specification for lambda function
+Resources:
+  indexphotos: # can be any name
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: index-photos-codepipeline # new lambda function created by cloudformation
+      Handler: index_photos.lambda_handler
+      Runtime: python3.8
+      CodeUri: . # path to lambda code
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Role: arn:aws:iam::280139081269:role/service-role/index-photos-role-m7x8ov06
+

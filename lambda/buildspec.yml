@@ -1,0 +1,9 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation package --template-file lambda/index-photos.yaml --s3-bucket codebuildtestbucket1234567 --output-template-file output-index-photos.yaml
+artifacts:
+  type: zip
+  files:
+    - output-index-photos.yaml
