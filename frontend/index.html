@@ -28,75 +28,82 @@
     <!-- <script src="./assets/js/aws-sdk.min.js"></script> -->
 </head>
 
-<body>
-    <div class="container">
-        <h1 style="margin: 20px 0px 40px 0px"> Photo Album </h1>
-    </div>
-
-    <!-- Upload Photo -->
-    <div class="input-group mb-3">
+<body style='background-color: rgb(200, 214, 216);'>
+    <div class="container" id="main-box" style='background-color: white;'>
         <div class="container">
-            <h3>Upload a photo</h3>
-            <form id='full-form'>
-                <div class="form-group" id="form-data">
-                  <input type="file" class="form-control-file" id="upload-photo-form">
-                </div>
-
-                <div class="form-group">
-                  <input type="text" class="form-control" id="custom-labels" aria-describedby="customlabel-help" placeholder="Enter custom labels">
-                  <small id="labels-info" class="form-text text-muted">Separate multiple labels with a comma.</small>
-                </div>
-
-                <button type="submit" class="btn btn-dark" id="upload-button" onclick=uploadToS3(event)>Submit</button>
-            </form>
+            <h1 style="margin: 40px 0px 40px 0px; padding-top: 20px"> Photo Album </h1>
         </div>
-    </div>
 
-    <!-- Search by Text or Voice -->
-    <div class="input-group mb-3">
-        <div class="container">
-            <h3 style="margin: 30px 0px 10px 0px">Search for photos</h3>
-            <input type="text" class="form-control" id="transcript" placeholder="Search..." aria-label="Search..." aria-describedby="basic-addon2">
+        <!-- Upload Photo -->
+        <div class="input-group mb-3">
+            <div class="container">
+                <h3>Upload a photo</h3>
+                <form id='full-form'>
+                    <div class="form-group" id="form-data">
+                    <input type="file" class="form-control-file" id="upload-photo-form">
+                    </div>
 
-            <!-- For Connecting to Web Socket -->
-            <div id="credentials-block" style="margin: 20px 0px 20px 0px">
-                <small id="labels-info" class="form-text text-info" style="margin: 20px 0px 5px 0px">* To search by voice, please enter your credentials</small>
-                <div class="row">
-                    <div class="col form-inline">
-                        <label class="form-text" style="margin: 5px">Access ID:</label>
-                        <input type="password" class="form-control form-control-sm border border-info" id="access_id" placeholder="ACCESS ID" value="" />
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="custom-labels" placeholder="Enter custom labels" aria-describedby="customlabel-help">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-dark" id="upload-button" onclick=uploadToS3(event)>Submit</button>
+                        </div>
+                    </div>
+                    <small style='margin-top: -10px' id="labels-info" class="form-text text-muted">Separate multiple labels with a comma.</small>
 
-                        <label class="form-text" style="margin: 5px">Secret Key:</label>
-                        <input type="password" class="form-control form-control-sm border border-info" id="secret_key" placeholder="SECRET KEY" value="" />
-                        <button id="credentials-button" class="btn btn-info btn-sm" style="margin: 5px" title="Hide Credentials">Hide Credentials</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search by Text or Voice -->
+        <div class="input-group mb-3">
+            <div class="container">
+                <h3 style="margin: 20px 0px 10px 0px">Search for photos</h3>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="transcript" placeholder="Search..." aria-label="Search..." aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-dark" id="search-button" onclick=searchforphotos(event)>Search</button>
+                    </div>
+                </div>
+
+                <!-- For Connecting to Web Socket -->
+                <div id="credentials-block" style="margin: 20px 0px 20px 0px">
+                    <small id="labels-info" class="form-text text-danger" style="margin: 20px 0px 5px 0px">* To search by voice, please enter your credentials</small>
+                    <div class="row">
+                        <div class="col form-inline">
+                            <label class="form-text" style="margin: 5px">Access ID:</label>
+                            <input type="password" class="form-control form-control-sm border" id="access_id" placeholder="ACCESS ID" value="" />
+
+                            <label class="form-text" style="margin: 5px">Secret Key:</label>
+                            <input type="password" class="form-control form-control-sm border" id="secret_key" placeholder="SECRET KEY" value="" />
+                            <button id="credentials-button" class="btn btn-secondary btn-sm" style="margin: 5px" title="Hide Credentials">Hide Credentials</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search by Voice -->
+                <!-- <div id="voice-controls" style="display:none;"> -->
+                <div id = "voice-controls" style="margin: 10px 0px 20px 0px">
+                    <small id="labels-info" class="form-text text-muted" style="margin: 10px 0px 5px 0px">To search by voice, press start and speak into your mic.</small>
+                    <div class="row">
+                        <div class="col">
+                            <button id="start-button" class="btn btn-info btn-sm" title="Start Transcription">Start</button>
+                            <button id="stop-button" class="btn btn-info btn-sm" title="Stop Transcription" disabled="true">Stop</button>
+                            <button id="reset-button" class="btn btn-info btn-sm" title="Clear Transcript">Clear</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Search by Voice -->
-            <!-- <div id="voice-controls" style="display:none;"> -->
-            <div id = "voice-controls" style="margin: 10px 0px 10px 0px">
-                <small id="labels-info" class="form-text text-muted" style="margin: 10px 0px 5px 0px">Press start and speak into your mic.</small>
-                <div class="row">
-                    <div class="col">
-                        <button id="start-button" class="btn btn-secondary btn-sm" title="Start Transcription">Start</button>
-                        <button id="stop-button" class="btn btn-secondary btn-sm" title="Stop Transcription" disabled="true">Stop</button>
-                        <button id="reset-button" class="btn btn-secondary btn-sm" title="Clear Transcript">Clear Transcript</button>
-                    </div>
-                </div>
+        <!-- For Rendering the Photos -->
+        <div id="photo-output" style='padding-bottom:20px'>
+            <div class="container" id="photo-grid">
+
             </div>
-
-            <button type="submit" class="btn btn-dark" style="margin: 20px 0px 30px 0px" id="search-button" onclick=searchforphotos(event)>Search</button>
         </div>
     </div>
-
-     <!-- For Rendering the Photos -->
-     <div id="photo-output">
-        <div class="container" id="photo-grid">
-
-        </div>
-    </div>
-
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
