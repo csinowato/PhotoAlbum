@@ -6,6 +6,9 @@ from requests_aws4auth import AWS4Auth
 from boto3.dynamodb.conditions import Key
 import base64
 
+
+# DEMO - CODE PIPELINE
+
 BUCKET_NAME = "b2-photo-storage"
 
 # ElasticSearch Instance
